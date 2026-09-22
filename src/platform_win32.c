@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #ifdef _WIN32
 
 #include "log.h"
@@ -6,29 +5,7 @@
 #include "utils.h"
 
 #include <stdarg.h>
-
-void print_windows(const unsigned short *fmt, ...) {
-    va_list va_args;
-    long    chars_written = 0;
-    DWORD   written       = 0;
-
-    HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    // const unsigned short *text = L"Got %zu \u2261 %zu (mod %zu)";
-    unsigned short textbuf[BUF_DEF] = {0};
-
-    va_start(va_args, fmt);
-    if (fmt == NULL) { return; }
-    chars_written = vswprintf_s(textbuf, BUF_DEF, fmt, va_args);
-
-    if (chars_written <= 0) {
-        LOG_ERROR("%s", "Failed to write va_args to text buffer!");
-        return;
-    }
-
-    WriteConsoleW(handle, textbuf, (DWORD)chars_written, &written, NULL);
-    va_end(va_args);
-}
+#include <stdlib.h>
 
 void start_timer(TimerData *tdata) {
     QueryPerformanceFrequency((TimeType *)(tdata->extra));
@@ -39,8 +16,8 @@ void end_timer(TimerData *tdata) {
     double total = 0.0;
     QueryPerformanceCounter(&tdata->end);
 
-    total          = (double)(tdata->end.QuadPart - tdata->start.QuadPart) / (double)((TimeType *)tdata->extra)->QuadPart;
-    tdata->diff_ns = total;
+    total       = (double)(tdata->end.QuadPart - tdata->start.QuadPart) / (double)((TimeType *)tdata->extra)->QuadPart;
+    tdata->diff = (long)total;
 }
 
 #endif

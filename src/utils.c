@@ -10,8 +10,8 @@
 static const char *const VALS[3] = {"a=", "b=", "m="};
 
 void populate_data(InMatrix inputs, Numbers *all_nums) {
-    size_t        out_nums[INPUTS] = {0};
-    unsigned long number           = 0;
+    int64_t out_nums[INPUTS] = {0};
+    int64_t number           = 0;
 
     // clang-format off
     #pragma unroll
@@ -23,7 +23,7 @@ void populate_data(InMatrix inputs, Numbers *all_nums) {
         }
 
         inputs[i][strlen(inputs[i]) - 1] = '\0';
-        number = strtoul(inputs[i], NULL, BASE);
+        number = strtol(inputs[i], NULL, BASE);
         out_nums[i] = number;
     }
 
@@ -33,12 +33,18 @@ void populate_data(InMatrix inputs, Numbers *all_nums) {
 }
 // clang-format on
 
-size_t calculate_gcd(size_t num1, size_t num2) {
-    size_t remainder = 1;
-    size_t quotient  = 1;
+void sanitize_inputs(Numbers *all_nums) {
+    if (all_nums->num_a < 0) { all_nums->num_a = ((all_nums->num_a % all_nums->mod) + all_nums->mod) % all_nums->mod; }
+    if (all_nums->num_b < 0) { all_nums->num_b = ((all_nums->num_b % all_nums->mod) + all_nums->mod) % all_nums->mod; }
+    if (all_nums->mod < 0) { all_nums->mod = -all_nums->mod; }
+}
 
-    size_t last_coeff  = num1 > num2 ? num1 : num2;
-    size_t other_coeff = num1 == last_coeff ? num2 : num1;
+int64_t calculate_gcd(int64_t num1, int64_t num2) {
+    int64_t remainder = 1;
+    int64_t quotient  = 1;
+
+    int64_t last_coeff  = num1 > num2 ? num1 : num2;
+    int64_t other_coeff = num1 == last_coeff ? num2 : num1;
 
     // NOLINTNEXTLINE(altera-unroll-loops)
     while (remainder != 0) {
@@ -62,13 +68,13 @@ void simplify_eq(Numbers *nums) {
     // print_out(L"Simplified expression: %zux \u2261 %zu (mod %zu)\n", nums->num_a, nums->num_b, nums->mod);
 }
 
-size_t get_inverse_mod(Numbers *nums) {
-    size_t inverse_mod = 1;
-    size_t remainder   = 0;
-    size_t numerator   = 0;
+int64_t get_inverse_mod(Numbers *nums) {
+    int64_t inverse_mod = 1;
+    int64_t remainder   = 0;
+    int64_t numerator   = 0;
 
     // NOLINTNEXTLINE(altera-unroll-loops)
-    while (true) {
+    while (1) {
         numerator = (nums->mod * inverse_mod) + 1;
         // LOG_INFO("calc: (%zu)%zu + %zu = %zu", nums->mod, inverse_mod, nums->num_b, numerator);
         remainder = (numerator % nums->num_a);
@@ -85,11 +91,12 @@ size_t get_inverse_mod(Numbers *nums) {
     return inverse_mod;
 }
 
-size_t get_solutions(Numbers *nums, size_t inverse_mod, size_t results[]) {
-    size_t num_b = nums->num_b * inverse_mod;
-    size_t x_1   = num_b % nums->mod;
-    results[0]   = x_1;
+int64_t get_solutions(Numbers *nums, int64_t inverse_mod, int64_t results[]) {
+    int64_t num_b = nums->num_b * inverse_mod;
+    int64_t x_1   = num_b % nums->mod;
+    results[0]    = x_1;
 
-    for (size_t i = 1; i < nums->gcd; i++) { results[i] = results[i - 1] + nums->mod; }
+#pragma unroll 4
+    for (int64_t i = 1; i < nums->gcd; i++) { results[i] = results[i - 1] + nums->mod; }
     return 0;
 }
