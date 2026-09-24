@@ -7,7 +7,7 @@
 #include "platform.h"
 #include "utils.h"
 
-#define OLEN BUF_DEF / 4
+#define OLEN (BUF_DEF / 4)
 
 int main(void) {
     TimerData tdata = {.extra = malloc(sizeof(void *)), .end = START_END_DEFAULT, .start = START_END_DEFAULT, .diff = 0};
@@ -27,11 +27,11 @@ int main(void) {
     start_timer(&tdata);
 
     all_nums.gcd = calculate_gcd(all_nums.num_a, all_nums.mod);
-    print_out(T("\nGot: %lix \u2261 %li (mod %li)"), all_nums.num_a, all_nums.num_b, all_nums.mod);
-    // print_out(L"GCD (%li, %li) = %li\n", all_nums.num_a, all_nums.mod, all_nums.gcd);
+    print_out(T("\nGot: %llix \u2261 %lli (mod %lli)"), all_nums.num_a, all_nums.num_b, all_nums.mod);
+    // print_out(L"GCD (%lli, %li) = %lli\n", all_nums.num_a, all_nums.mod, all_nums.gcd);
 
     if (all_nums.num_b % all_nums.gcd != 0) {
-        printf("%li is not cleanly divisible with %li, hence, no congruent solutions!\n", all_nums.num_b, all_nums.gcd);
+        printf("%lli is not cleanly divisible with %lli, hence, no congruent solutions!\n", all_nums.num_b, all_nums.gcd);
         return 0;
     }
 
@@ -41,7 +41,7 @@ int main(void) {
     inverse_mod = get_inverse_mod(&all_nums);
     // print_out(L"Got inverse mod: %li\n", inverse_mod);
 
-    results = (int64_t *)malloc((size_t)all_nums.gcd * sizeof(size_t));
+    results = (int64_t *)malloc((uint64_t)all_nums.gcd * sizeof(uint64_t));
     if (results == NULL) {
         LOG_ERROR("%s", "Failed to allocate memory for results");
         return -1;
@@ -49,15 +49,15 @@ int main(void) {
 
     get_solutions(&all_nums, inverse_mod, results);
 
-#pragma unroll 5
+//#pragma unroll 5
     for (int64_t i = 0; i < all_nums.gcd; ++i) {
-        size_t buflen = sizeof(outbuf) - (size_t)ptr_add_len;
-        ptr_add_len += snprintf(outbuf + ptr_add_len, buflen, "%sx_%li = %li", i ? ", " : "", i, results[i]);
+        uint64_t buflen = sizeof(outbuf) - (uint64_t)ptr_add_len;
+        ptr_add_len += snprintf(outbuf + ptr_add_len, buflen, "%sx_%lli = %lli", i ? ", " : "", i, results[i]);
     }
 
     const char *const UNIT = end_timer(&tdata);
     printf("Got results: %s\n", buf_ptr);
-    printf("total runtime: %lu %s\n", tdata.diff, UNIT);
+    printf("total runtime: %llu %s\n", (uint64_t)tdata.diff, UNIT);
 
     free(results);
     return 0;

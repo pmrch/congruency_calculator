@@ -1,23 +1,28 @@
 using namespace System.Collections.Generic
 
-$PSStyle.OutputRendering = 'ANSI'
+#$PSStyle.OutputRendering = 'ANSI'
 
 [string] $cStandard = "clatest"
-[string] $CC = "clang-cl.exe"
-[string] $cTarget = "c-project-win32"
+#[string] $CC = "clang-cl.exe"
+[string] $CC = "cl.exe"
+[string] $LNK = "link.exe"
+[string] $cTarget = "congruency-calculator"
 
-[string] $cOptimization = "/Gy /fp:fast /clang:-O3 /clang:-march=native /clang:-DNDEBUG"
-[string] $cDebug = "-fsanitize=address /Oy- -fno-omit-frame-pointer"
+#[string] $cOptimization = "/Gy /fp:fast /clang:-O3 /clang:-march=native /clang:-DNDEBUG"
+[string] $cOptimization = "/Gy /fp:fast /O2 /arch:AVX512"
 
-[string] $mimallocLib = "$env:VCPKG_ROOT\installed\x64-windows-static\lib"
+#[string] $cDebug = "-fsanitize=address /Oy- -fno-omit-frame-pointer"
+
+#[string] $mimallocLib = "$env:VCPKG_ROOT\installed\x64-windows-static\lib"
 [string] $cWinVer = "/D_WIN32_WINNT=0x0A00"
 [string] $cIncludes = "/Iinclude"
 
 [string] $cStrictFlags = @("/clang:-Weverything", "/clang:-Werror", "/clang:-Wno-unsafe-buffer-usage")
-[string] $cCflags = "/nologo /std:$cStandard -fcolor-diagnostics -fansi-escape-codes /MT $cOptimization $cIncludes $cStrictFlags $cWinVer"
-[string] $cLdflags = "/nologo /link /LIBPATH:$mimallocLib /SUBSYSTEM:CONSOLE"
+#[string] $cCflags = "/nologo /std:$cStandard -fcolor-diagnostics -fansi-escape-codes /MT $cOptimization $cIncludes $cStrictFlags $cWinVer"
+[string] $cCflags = "/nologo /std:$cStandard /MT $cOptimization $cIncludes $cWinVer"
+[string] $cLdflags = "/nologo /SUBSYSTEM:CONSOLE"
 
-#[string] $cCflags = "/nologo /std:$cStandard -fcolor-diagnostics -fansi-escape-codes /MT $cDebug $cIncludes $cStrictFlags $cWinVer"
+#[string] $cCflags = "/nologo /std:$cStandard fcolor-diagnostics -fansi-escape-codes /MT $cDebug $cIncludes $cStrictFlags $cWinVer"
 #[string] $cLdflags = "/nologo -fsanitize=address /link /SUBSYSTEM:CONSOLE"
 
 [string] $ccJson = "compile_commands.json"
@@ -53,13 +58,16 @@ function Compile {
     if (-not (([System.IO.DirectoryInfo]$ccJson).Exists)) { Write-Output "" > $ccJson }
 
     Get-ChildItem -Path $cSrc -Filter "*.c" -Recurse -File | ForEach-Object {
-        [string] $relativePath = [System.IO.Path]::GetRelativePath($cSrc, $_.FullName)
+        #[string] $relativePath = [System.IO.Path]::GetRelativePath($cSrc, $_.FullName)
+	[string] $fName = $_.FullName
+	[string] $relativePath = "$cSrc\$fName"
 
         [string] $objName = ($relativePath -replace '[\\/]', '_') -replace '\.c$', '.obj'
         [string] $objPath = [System.IO.Path]::Combine($cBuild, $objName)
         [string] $srcFileFullPath = $_.FullName
 
-        [string[]] $extraArgs = @("/clang:-DLOG_LEVEL=$LogLevel", "/c", "$srcFileFullPath", "/Fo:$objPath")
+        #[string[]] $extraArgs = @("/clang:-DLOG_LEVEL=$LogLevel", "/c", "$srcFileFullPath", "/Fo:$objPath")
+	[string[]] $extraArgs = @("/c", "$srcFileFullPath", "/Fo:$objPath")
         [string[]] $cArgs = $baseArgs + $extraArgs
 
         [PSCustomObject] $dbEntry = [ordered]@{ 
@@ -100,7 +108,7 @@ function LinkObjs {
         [string[]] $objPaths = foreach ($obj in $objFileList) { $obj.fullPath }
         [string[]] $linkArgs = $objPaths + "/Fe:$cTarget.exe" + ($cLdflags -split '\s+')
 
-        [string] $outString = (& $CC $linkArgs 2>&1) -join [System.Environment]::NewLine
+        [string] $outString = (& $LNK $linkArgs 2>&1) -join [System.Environment]::NewLine
         [int] $exitCode = $LASTEXITCODE
 
         # Write-Host "Linking: $CC $linkArgs"

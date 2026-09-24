@@ -12,7 +12,7 @@
 // Define convenient type
 typedef char InMatrix[INPUTS][INPUT_MAX];
 
-typedef struct __attribute__((aligned(STRUCT_ALIGN32))) {
+typedef struct NUMBERS_ALIGN {
     int64_t num_a;
     int64_t num_b;
     int64_t gcd;

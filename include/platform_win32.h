@@ -12,10 +12,13 @@
 #include <wchar.h>
 
 #define STRUCT_ALIGN_TIME 32
-#define START_END_DEFAULT ({0})
+#define START_END_DEFAULT {0}
 
 #define T(x) L##x
 #define print_out(fmt, ...) (print_windows(fmt, __VA_ARGS__))
+
+#define ALIGN_TIME
+#define NUMBERS_ALIGN
 
 typedef LARGE_INTEGER TimeType;
 

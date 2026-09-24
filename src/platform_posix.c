@@ -3,10 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ONE_BILLION 1000000000L
-#define ONE_MILLION 1000000L
-#define ONE_THOUSAND 1000L
-
 __attribute__((format(printf, 1, 2))) void print_linux(const char *fmt, ...) {
     if (fmt == NULL) { return; }
 

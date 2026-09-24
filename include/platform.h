@@ -13,7 +13,11 @@
 #define STRUCT_ALIGN16 16
 #define STRUCT_ALIGN32 32
 
-typedef struct __attribute__((aligned(STRUCT_ALIGN_TIME))) {
+#define ONE_BILLION 1000000000L
+#define ONE_MILLION 1000000L
+#define ONE_THOUSAND 1000L
+
+typedef struct ALIGN_TIME {
     void    *extra;
     TimeType start;
     TimeType end;
@@ -23,7 +27,6 @@ typedef struct __attribute__((aligned(STRUCT_ALIGN_TIME))) {
 // Function definitions
 void        start_timer(TimerData *tdata);
 const char *end_timer(TimerData *tdata);
-void        output_format(void);
 
 // Definitions
 
